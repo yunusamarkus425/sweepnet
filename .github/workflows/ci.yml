@@ -1,0 +1,40 @@
+name: CI - Contract Validation
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install Clarinet
+      run: |
+        wget -nv https://github.com/hirosystems/clarinet/releases/download/v2.8.0/clarinet-linux-x64.tar.gz -O clarinet-linux-x64.tar.gz
+        tar -xzf clarinet-linux-x64.tar.gz
+        chmod +x ./clarinet
+        sudo mv ./clarinet /usr/local/bin/
+        
+    - name: Verify Clarinet installation
+      run: clarinet --version
+      
+    - name: Run contract syntax check
+      run: clarinet check
+      
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Run tests
+      run: npm test
